@@ -9,6 +9,7 @@
 #include "flutter/fml/time/time_point.h"
 #include "flutter/fml/trace_event.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
+#include "flutter/fml/logging.h"
 
 namespace flutter {
 

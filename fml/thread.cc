@@ -107,7 +107,7 @@ void SetThreadName(const std::string& name) {
   }
 #if defined(FML_OS_MACOSX)
   pthread_setname_np(name.c_str());
-#elif defined(FML_OS_LINUX) || defined(FML_OS_ANDROID)
+#elif defined(FML_OS_LINUX) || defined(FML_OS_ANDROID) || defined(FML_OS_OHOS)
   // Linux thread names are limited to 16 characters including the terminating
   // null.
   constexpr std::string::size_type kLinuxMaxThreadNameLen = 15;

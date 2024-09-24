@@ -63,7 +63,7 @@
 #include "flutter/fml/time/time_point.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
-#if (FLUTTER_RELEASE && !defined(OS_FUCHSIA) && !defined(FML_OS_ANDROID))
+#if (FLUTTER_RELEASE && !defined(OS_FUCHSIA) && !defined(FML_OS_ANDROID) && !defined(FML_OS_OHOS))
 #define FLUTTER_TIMELINE_ENABLED 0
 #else
 #define FLUTTER_TIMELINE_ENABLED 1

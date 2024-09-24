@@ -47,6 +47,9 @@ def get_out_dir(args):
   if args.linux_cpu is not None:
     target_dir.append(args.linux_cpu)
 
+  if args.ohos_cpu is not None:
+    target_dir.append(args.ohos_cpu)
+
   if args.windows_cpu != 'x64':
     target_dir.append(args.windows_cpu)
 
@@ -109,7 +112,7 @@ def can_use_prebuilt_dart(args):
   # When doing a 'host' build (args.target_os is None), or a build when the
   # target OS and host OS are different, the prebuilt Dart SDK is the Dart SDK
   # for the host system's OS and archetecture.
-  if args.target_os is None or args.target_os in ['android', 'ios', 'fuchsia']:
+  if args.target_os is None or args.target_os in ['android', 'ios', 'fuchsia', 'ohos']:
     if sys.platform.startswith(('cygwin', 'win')):
       prebuilt = 'windows-x64'
     elif sys.platform == 'darwin':
@@ -182,6 +185,8 @@ def get_target_cpu(args):
     return args.mac_cpu
   if args.target_os == 'linux':
     return args.linux_cpu
+  if args.target_os == 'ohos':
+    return args.ohos_cpu
   if args.target_os == 'fuchsia':
     return args.fuchsia_cpu
   if args.target_os == 'wasm':
@@ -515,7 +520,7 @@ def to_gn_args(args):
 
   if args.dart_optimization_level:
     gn_args['dart_default_optimization_level'] = args.dart_optimization_level
-  elif gn_args['target_os'] in ['android', 'ios']:
+  elif gn_args['target_os'] in ['android', 'ios', 'ohos']:
     gn_args['dart_default_optimization_level'] = '2'
 
   gn_args['flutter_use_fontconfig'] = args.enable_fontconfig
@@ -595,7 +600,7 @@ def to_gn_args(args):
   else:
     gn_args['skia_use_gl'] = args.target_os != 'fuchsia'
 
-  if sys.platform == 'darwin' and args.target_os not in ['android', 'fuchsia']:
+  if sys.platform == 'darwin' and args.target_os not in ['android', 'fuchsia', 'ohos']:
     # OpenGL is deprecated on macOS > 10.11.
     # This is not necessarily needed but enabling this until we have a way to
     # build a macOS metal only shell and a gl only shell.
@@ -899,7 +904,7 @@ def parse_args(args):
   )
 
   parser.add_argument(
-      '--target-os', type=str, choices=['android', 'ios', 'mac', 'linux', 'fuchsia', 'wasm', 'win']
+      '--target-os', type=str, choices=['android', 'ios', 'mac', 'linux', 'fuchsia', 'wasm', 'win', 'ohos']
   )
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument(
@@ -928,6 +933,9 @@ def parse_args(args):
   )
   parser.add_argument('--web', action='store_true', default=False)
   parser.add_argument('--windows', dest='target_os', action='store_const', const='win')
+
+  parser.add_argument('--ohos', dest='target_os', action='store_const', const='ohos')
+  parser.add_argument('--ohos-cpu', type=str, choices=['x64', 'arm64'], default='x64')
 
   parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm'])
   parser.add_argument('--fuchsia-cpu', type=str, choices=['x64', 'arm64'], default='x64')

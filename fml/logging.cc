@@ -197,6 +197,24 @@ LogMessage::~LogMessage() {
       }
     }
     buffer.FlushRecord();
+#elif defined(FML_OS_OHOS)
+  LogLevel priority = (severity_ < 0) ? LOG_DEBUG : LOG_INFO;
+  switch (severity_) {
+    case kLogImportant:
+    case kLogInfo:
+      priority = LOG_INFO;
+      break;
+    case kLogWarning:
+      priority = LOG_WARNING;
+      break;
+    case kLogError:
+      priority = LOG_ERROR;
+      break;
+    case kLogFatal:
+      priority = LOG_FATAL;
+      break;
+  }
+  OH_LOG_Print(LOG_APP, priority, 0, "flutter", stream_.str().c_str());
 #else
     // Don't use std::cerr here, because it may not be initialized properly yet.
     fprintf(stderr, "%s", stream_.str().c_str());

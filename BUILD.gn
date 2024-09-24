@@ -39,7 +39,7 @@ config("export_dynamic_symbols") {
   # -exported_symbols_list is the macOS linker syntax. The different flags
   # accept files formatted differently, so we have exported_symbols.sym for GNU
   # linker syntax, and exported_symbols_mac.sym for the macOS linker syntax.
-  if (is_linux || is_fuchsia) {
+  if (is_linux || is_fuchsia || is_ohos) {
     inputs = [ "//flutter/common/exported_symbols.sym" ]
     ldflags = [ "-Wl,--dynamic-list=" + rebase_path(inputs[0], root_build_dir) ]
   } else if (is_mac) {
@@ -56,7 +56,7 @@ config("export_dynamic_symbols") {
 config("export_dynamic_test_symbols") {
   # See comment in :export_dynamic_symbols.
   # This config exposes an additional symbol meant for flutter_tester.
-  if (is_linux || is_fuchsia) {
+  if (is_linux || is_fuchsia || is_ohos) {
     inputs = [ "//flutter/common/exported_test_symbols.sym" ]
     ldflags = [ "-Wl,--dynamic-list=" + rebase_path(inputs[0], root_build_dir) ]
   } else if (is_mac) {
