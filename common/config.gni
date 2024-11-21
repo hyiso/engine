@@ -6,6 +6,10 @@ if (is_android) {
   import("//build/config/android/config.gni")
 }
 
+if (is_ohos) {
+  import("//build/config/ohos/config.gni")
+}
+
 if (target_cpu == "arm" || target_cpu == "arm64") {
   import("//build/config/arm.gni")
 }
@@ -144,7 +148,8 @@ if (flutter_prebuilt_dart_sdk) {
   # also don't need one, so even when the build is targeting one of these
   # platforms, we use the prebuilt Dart SDK for the host.
   if (current_toolchain == host_toolchain || target_os == "android" ||
-      target_os == "fuchsia" || target_os == "ios" || target_os == "wasm") {
+      target_os == "fuchsia" || target_os == "ios" || target_os == "wasm" ||
+      target_os == "ohos") {
     prebuilt_dart_sdk = host_prebuilt_dart_sdk
     prebuilt_dart_sdk_config = _host_prebuilt_config
   } else {

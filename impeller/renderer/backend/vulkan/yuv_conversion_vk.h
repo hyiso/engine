@@ -27,6 +27,11 @@ using YUVConversionDescriptorVK =
                        ,
                        vk::ExternalFormatANDROID
 #endif  // FML_OS_ANDROID
+#if FML_OS_OHOS
+                       // For VK_OHOS_external_memory
+                       ,
+                       vk::ExternalFormatOHOS
+#endif  // FML_OS_OHOS
                        >;
 
 class YUVConversionLibraryVK;

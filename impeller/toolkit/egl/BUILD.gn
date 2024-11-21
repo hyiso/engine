@@ -29,4 +29,7 @@ impeller_component("egl") {
   if (is_android) {
     libs = [ "EGL" ]
   }
+  if (is_ohos) {
+    libs = [ "EGL" ]
+  }
 }

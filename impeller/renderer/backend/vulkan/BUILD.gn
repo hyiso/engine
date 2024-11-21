@@ -126,6 +126,14 @@ impeller_component("vulkan") {
     "yuv_conversion_vk.h",
   ]
 
+  public_deps = [
+    "../../:renderer",
+    "../../../shader_archive",
+    "//flutter/flutter_vma",
+    "//flutter/fml",
+    "//flutter/third_party/vulkan_memory_allocator",
+  ]
+
   if (is_android) {
     sources += [
       "android/ahb_texture_source_vk.cc",
@@ -140,18 +148,31 @@ impeller_component("vulkan") {
       "swapchain/ahb/external_fence_vk.cc",
       "swapchain/ahb/external_fence_vk.h",
     ]
+
+    public_deps += [
+      "../../../toolkit/android",
+      "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
+    ]
   }
 
-  public_deps = [
-    "../../:renderer",
-    "../../../shader_archive",
-    "//flutter/flutter_vma",
-    "//flutter/fml",
-    "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
-    "//flutter/third_party/vulkan_memory_allocator",
-  ]
+  if (is_ohos) {
+    sources += [
+      "ohos/ohb_texture_source_vk.cc",
+      "ohos/ohb_texture_source_vk.h",
+      "swapchain/ohb/external_fence_vk.cc",
+      "swapchain/ohb/external_fence_vk.h",
+      "swapchain/ohb/ohb_formats.h",
+      "swapchain/ohb/ohb_swapchain_impl_vk.cc",
+      "swapchain/ohb/ohb_swapchain_impl_vk.h",
+      "swapchain/ohb/ohb_swapchain_vk.cc",
+      "swapchain/ohb/ohb_swapchain_vk.h",
+      "swapchain/ohb/ohb_texture_pool_vk.cc",
+      "swapchain/ohb/ohb_texture_pool_vk.h",
+    ]
 
-  if (is_android) {
-    public_deps += [ "../../../toolkit/android" ]
+    public_deps += [
+      "../../../toolkit/ohos",
+      "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
+    ]
   }
 }

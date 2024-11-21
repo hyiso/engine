@@ -32,6 +32,15 @@
 #if defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
 #define FML_OS_IOS_SIMULATOR 1
 #endif  // defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
+// This should be placed before the check for linux
+#elif defined(__OHOS__)
+#define FML_OS_OHOS 1
+// include a system header to pull in features.h for glibc/uclibc macros.
+#include <unistd.h>
+#if defined(__GLIBC__) && !defined(__UCLIBC__)
+// we really are using glibc, not uClibc pretending to be glibc
+#define LIBC_GLIBC 1
+#endif
 #elif defined(__linux__)
 #define FML_OS_LINUX 1
 // include a system header to pull in features.h for glibc/uclibc macros.

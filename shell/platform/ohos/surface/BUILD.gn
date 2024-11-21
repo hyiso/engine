@@ -1,0 +1,39 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/shell/config.gni")
+
+source_set("surface") {
+  sources = [
+    "ohos_snapshot_surface_producer.cc",
+    "ohos_snapshot_surface_producer.h",
+    "ohos_surface.cc",
+    "ohos_surface.h",
+  ]
+
+  public_configs = [ "//flutter:config" ]
+
+  deps = [
+    ":native_window",
+    "//flutter/flow",
+    "//flutter/fml",
+    "//flutter/shell/common",
+    "//flutter/shell/platform/ohos/context",
+    "//flutter/skia",
+  ]
+}
+
+source_set("native_window") {
+  sources = [
+    "ohos_native_window.cc",
+    "ohos_native_window.h",
+  ]
+
+  public_configs = [ "//flutter:config" ]
+
+  deps = [
+    "//flutter/fml",
+    "//flutter/skia",
+  ]
+}

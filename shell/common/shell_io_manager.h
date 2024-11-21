@@ -33,7 +33,7 @@ class ShellIOManager final : public IOManager {
       fml::RefPtr<fml::TaskRunner> unref_queue_task_runner,
       std::shared_ptr<impeller::Context> impeller_context,
       fml::TimeDelta unref_queue_drain_delay =
-          fml::TimeDelta::FromMilliseconds(8));
+          fml::TimeDelta::FromMilliseconds(0));
 
   ~ShellIOManager() override;
 

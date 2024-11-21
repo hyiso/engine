@@ -115,6 +115,15 @@ bool VulkanProcTable::SetupInstanceProcAddresses(
   ACQUIRE_PROC(CreateAndroidSurfaceKHR, handle);
 #endif  // FML_OS_ANDROID
 
+#if FML_OS_OHOS
+  ACQUIRE_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR, handle);
+  ACQUIRE_PROC(GetPhysicalDeviceSurfaceFormatsKHR, handle);
+  ACQUIRE_PROC(GetPhysicalDeviceSurfacePresentModesKHR, handle);
+  ACQUIRE_PROC(GetPhysicalDeviceSurfaceSupportKHR, handle);
+  ACQUIRE_PROC(DestroySurfaceKHR, handle);
+  ACQUIRE_PROC(CreateSurfaceOHOS, handle);
+#endif  // FML_OS_OHOS
+
   // The debug report functions are optional. We don't want proc acquisition to
   // fail here because the optional methods were not present (since ACQUIRE_PROC
   // returns false on failure). Wrap the optional proc acquisitions in an
@@ -181,6 +190,13 @@ bool VulkanProcTable::SetupDeviceProcAddresses(
   ACQUIRE_PROC(GetSwapchainImagesKHR, handle);
   ACQUIRE_PROC(QueuePresentKHR, handle);
 #endif  // FML_OS_ANDROID
+#if FML_OS_OHOS
+  ACQUIRE_PROC(AcquireNextImageKHR, handle);
+  ACQUIRE_PROC(CreateSwapchainKHR, handle);
+  ACQUIRE_PROC(DestroySwapchainKHR, handle);
+  ACQUIRE_PROC(GetSwapchainImagesKHR, handle);
+  ACQUIRE_PROC(QueuePresentKHR, handle);
+#endif  // FML_OS_OHOS
 #if OS_FUCHSIA
   ACQUIRE_PROC(ImportSemaphoreZirconHandleFUCHSIA, handle);
   ACQUIRE_PROC(GetSemaphoreZirconHandleFUCHSIA, handle);

@@ -13,6 +13,10 @@
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_swapchain_vk.h"
 #endif  // FML_OS_ANDROID
 
+#if FML_OS_OHOS
+#include "impeller/renderer/backend/vulkan/swapchain/ohb/ohb_swapchain_vk.h"
+#endif  // FML_OS_OHOS
+
 namespace impeller {
 
 std::shared_ptr<SwapchainVK> SwapchainVK::Create(
@@ -85,6 +89,37 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
   return Create(context, std::move(surface), window.GetSize(), enable_msaa);
 }
 #endif  // FML_OS_ANDROID
+
+#if FML_OS_OHOS
+std::shared_ptr<SwapchainVK> SwapchainVK::Create(
+    const std::shared_ptr<Context>& context,
+    OHNativeWindow* p_window,
+    bool enable_msaa) {
+  TRACE_EVENT0("impeller", "CreateOHOSSwapchain");
+  if (!context) {
+    return nullptr;
+  }
+
+  ohos::NativeWindow window(p_window);
+  if (!window.IsValid()) {
+    return nullptr;
+  }
+
+  vk::SurfaceCreateInfoOHOS surface_info;
+  surface_info.window = window.GetHandle();
+  auto [result, surface] =
+      ContextVK::Cast(*context).GetInstance().createSurfaceOHOSUnique(
+          surface_info);
+  if (result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create OHOS Surface: "
+                   << vk::to_string(result);
+    return nullptr;
+  }
+
+  // Fallback to KHR swapchains if AHB swapchains aren't available.
+  return Create(context, std::move(surface), window.GetSize(), enable_msaa);
+}
+#endif  // FML_OS_OHOS
 
 SwapchainVK::SwapchainVK() = default;
 

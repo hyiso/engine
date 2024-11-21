@@ -142,6 +142,15 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(QueuePresentKHR);
   DEFINE_PROC(CreateAndroidSurfaceKHR);
 #endif  // FML_OS_ANDROID
+#if FML_OS_OHOS
+  DEFINE_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR);
+  DEFINE_PROC(GetPhysicalDeviceSurfaceFormatsKHR);
+  DEFINE_PROC(GetPhysicalDeviceSurfacePresentModesKHR);
+  DEFINE_PROC(GetPhysicalDeviceSurfaceSupportKHR);
+  DEFINE_PROC(GetSwapchainImagesKHR);
+  DEFINE_PROC(QueuePresentKHR);
+  DEFINE_PROC(CreateSurfaceOHOS);
+#endif  // FML_OS_OHOS
 #if OS_FUCHSIA
   DEFINE_PROC(ImportSemaphoreZirconHandleFUCHSIA);
   DEFINE_PROC(GetSemaphoreZirconHandleFUCHSIA);

@@ -109,6 +109,77 @@ enum class RequiredAndroidDeviceExtensionVK : uint32_t {
 };
 
 //------------------------------------------------------------------------------
+/// @brief      A device extension available on all OHOS platforms. Without
+///             the presence of these extensions on OHOS, context creation
+///             will fail.
+///
+///             Platform agnostic code can still check if these OHOS
+///             extensions are present.
+///
+enum class RequiredOHOSDeviceExtensionVK : uint32_t {
+  //----------------------------------------------------------------------------
+  /// For importing native buffers used in external texture composition.
+  kOHOSExternalMemory,
+
+  //----------------------------------------------------------------------------
+  /// Dependency of kANDROIDExternalMemoryAndroidHardwareBuffer.
+  ///
+  /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_sampler_ycbcr_conversion.html
+  ///
+  kKHRSamplerYcbcrConversion,
+
+  //----------------------------------------------------------------------------
+  /// Dependency of kANDROIDExternalMemoryAndroidHardwareBuffer.
+  ///
+  /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_external_memory.html
+  ///
+  kKHRExternalMemory,
+
+  //----------------------------------------------------------------------------
+  /// Dependency of kANDROIDExternalMemoryAndroidHardwareBuffer.
+  ///
+  /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_EXT_queue_family_foreign.html
+  ///
+  kEXTQueueFamilyForeign,
+
+  //----------------------------------------------------------------------------
+  /// Dependency of kANDROIDExternalMemoryAndroidHardwareBuffer.
+  ///
+  /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_dedicated_allocation.html
+  ///
+  kKHRDedicatedAllocation,
+
+  //----------------------------------------------------------------------------
+  /// For exporting file descriptors from fences to interact with platform APIs.
+  ///
+  /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_external_fence_fd.html
+  ///
+  kKHRExternalFenceFd,
+
+  //----------------------------------------------------------------------------
+  /// Dependency of kKHRExternalFenceFd.
+  ///
+  /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_external_fence.html
+  ///
+  kKHRExternalFence,
+
+  //----------------------------------------------------------------------------
+  /// For importing sync file descriptors as semaphores so the GPU can wait for
+  /// semaphore to be signaled.
+  ///
+  /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_external_semaphore_fd.html
+  kKHRExternalSemaphoreFd,
+
+  //----------------------------------------------------------------------------
+  /// Dependency of kKHRExternalSemaphoreFd
+  ///
+  /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_external_semaphore.html
+  kKHRExternalSemaphore,
+
+  kLast,
+};
+
+//------------------------------------------------------------------------------
 /// @brief      A device extension enabled if available. Subsystems cannot
 ///             assume availability and must check if these extensions are
 ///             available.
@@ -152,6 +223,8 @@ class CapabilitiesVK final : public Capabilities,
   bool HasExtension(RequiredCommonDeviceExtensionVK ext) const;
 
   bool HasExtension(RequiredAndroidDeviceExtensionVK ext) const;
+
+  bool HasExtension(RequiredOHOSDeviceExtensionVK ext) const;
 
   bool HasExtension(OptionalDeviceExtensionVK ext) const;
 
@@ -225,6 +298,7 @@ class CapabilitiesVK final : public Capabilities,
   std::set<RequiredCommonDeviceExtensionVK> required_common_device_extensions_;
   std::set<RequiredAndroidDeviceExtensionVK>
       required_android_device_extensions_;
+  std::set<RequiredOHOSDeviceExtensionVK> required_ohos_device_extensions_;
   std::set<OptionalDeviceExtensionVK> optional_device_extensions_;
   mutable PixelFormat default_color_format_ = PixelFormat::kUnknown;
   PixelFormat default_stencil_format_ = PixelFormat::kUnknown;

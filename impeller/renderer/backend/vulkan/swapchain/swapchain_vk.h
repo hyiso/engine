@@ -16,6 +16,9 @@
 #if FML_OS_ANDROID
 #include "impeller/toolkit/android/native_window.h"
 #endif  // FML_OS_ANDROID
+#if FML_OS_OHOS
+#include "impeller/toolkit/ohos/native_window.h"
+#endif  // FML_OS_OHOS
 
 namespace impeller {
 
@@ -39,6 +42,13 @@ class SwapchainVK {
       ANativeWindow* window,
       bool enable_msaa = true);
 #endif  // FML_OS_ANDROID
+
+#if FML_OS_OHOS
+  static std::shared_ptr<SwapchainVK> Create(
+      const std::shared_ptr<Context>& context,
+      OHNativeWindow* window,
+      bool enable_msaa = true);
+#endif  // FML_OS_OHOS
 
   virtual ~SwapchainVK();
 

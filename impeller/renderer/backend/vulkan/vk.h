@@ -36,6 +36,12 @@
 #define VK_USE_PLATFORM_ANDROID_KHR
 #endif  // VK_USE_PLATFORM_ANDROID_KHR
 
+#elif FML_OS_OHOS
+
+#ifndef VK_USE_PLATFORM_OHOS
+#define VK_USE_PLATFORM_OHOS
+#endif  // VK_USE_PLATFORM_OHOS
+
 #elif FML_OS_LINUX
 
 // Nothing for now.

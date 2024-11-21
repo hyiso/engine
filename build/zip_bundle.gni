@@ -7,10 +7,13 @@ import("//flutter/shell/version/version.gni")
 
 if (flutter_runtime_mode == "jit_release") {
   android_zip_archive_dir = "android-$target_cpu-jit-release"
+  ohos_zip_archive_dir = "ohos-$target_cpu-jit-release"
 } else {
   android_zip_archive_dir = "android-$target_cpu"
+  ohos_zip_archive_dir = "ohos-$target_cpu"
   if (flutter_runtime_mode != "debug") {
     android_zip_archive_dir += "-$flutter_runtime_mode"
+    ohos_zip_archive_dir += "-$flutter_runtime_mode"
   }
 }
 

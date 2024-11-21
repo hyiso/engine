@@ -92,6 +92,38 @@ class VulkanSwapchain {
   VulkanBackbuffer* GetNextBackbuffer();
 #endif  // FML_OS_ANDROID
 
+#if FML_OS_OHOS
+ private:
+  const VulkanProcTable& vk;
+  const VulkanDevice& device_;
+  VkSurfaceCapabilitiesKHR capabilities_;
+  VkSurfaceFormatKHR surface_format_;
+  VulkanHandle<VkSwapchainKHR> swapchain_;
+  std::vector<std::unique_ptr<VulkanBackbuffer>> backbuffers_;
+  std::vector<std::unique_ptr<VulkanImage>> images_;
+  std::vector<sk_sp<SkSurface>> surfaces_;
+  VkPipelineStageFlagBits current_pipeline_stage_;
+  size_t current_backbuffer_index_;
+  size_t current_image_index_;
+  bool valid_;
+
+  std::vector<VkImage> GetImages() const;
+
+  bool CreateSwapchainImages(GrDirectContext* skia_context,
+                             SkColorType color_type,
+                             const sk_sp<SkColorSpace>& color_space,
+                             VkImageUsageFlags usage_flags);
+
+  sk_sp<SkSurface> CreateSkiaSurface(GrDirectContext* skia_context,
+                                     VkImage image,
+                                     VkImageUsageFlags usage_flags,
+                                     const SkISize& size,
+                                     SkColorType color_type,
+                                     sk_sp<SkColorSpace> color_space) const;
+
+  VulkanBackbuffer* GetNextBackbuffer();
+#endif  // FML_OS_OHOS
+
   FML_DISALLOW_COPY_AND_ASSIGN(VulkanSwapchain);
 };
 

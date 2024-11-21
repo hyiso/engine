@@ -20,6 +20,8 @@
 #include <lib/syslog/structured_backend/fuchsia_syslog.h>
 #include <zircon/process.h>
 #include "flutter/fml/platform/fuchsia/log_state.h"
+#elif defined(FML_OS_OHOS)
+#include "flutter/fml/platform/ohos/log_level.h"
 #endif
 
 namespace fml {
@@ -197,6 +199,25 @@ LogMessage::~LogMessage() {
       }
     }
     buffer.FlushRecord();
+#elif defined(FML_OS_OHOS)
+    ohos_LogLevel level = (severity_ < 0) ? HILOG_LOG_DEBUG : HILOG_LOG_INFO;
+    switch (severity_) {
+      case kLogImportant:
+      case kLogInfo:
+        level = HILOG_LOG_INFO;
+        break;
+      case kLogWarning:
+        level = HILOG_LOG_WARN;
+        break;
+      case kLogError:
+        level = HILOG_LOG_ERROR;
+        break;
+      case kLogFatal:
+        level = HILOG_LOG_FATAL;
+        break;
+    }
+    OH_LOG_Print(LOG_APP, (LogLevel)level, 0, "flutter", "%{public}s",
+                 stream_.str().c_str());
 #else
     // Don't use std::cerr here, because it may not be initialized properly yet.
     fprintf(stderr, "%s", stream_.str().c_str());

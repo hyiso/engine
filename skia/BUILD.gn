@@ -222,6 +222,21 @@ optional("fontmgr_android") {
   sources = skia_ports_fontmgr_android_sources
 }
 
+optional("fontmgr_ohos") {
+  enabled = skia_enable_fontmgr_ohos
+  public_defines = [ "SK_FONTMGR_OHOS_AVAILABLE" ]
+  deps = [
+    ":typeface_freetype",
+    "//flutter/third_party/rapidjson",
+  ]
+  public = [ "$_skia_root/include/ports/SkFontMgr_ohos.h" ]
+  sources = [
+    "$_skia_root/src/ports/SkFontMgr_ohos.cpp",
+    "$_skia_root/src/ports/SkFontMgr_ohos_parser.cpp",
+    "$_skia_root/src/ports/SkFontMgr_ohos_parser.h",
+  ]
+}
+
 optional("fontmgr_custom") {
   enabled =
       skia_enable_fontmgr_custom_directory ||
@@ -413,6 +428,12 @@ optional("gpu") {
       sources += [
         "$_skia_root/src/gpu/ganesh/gl/webgl/GrGLMakeNativeInterface_webgl.cpp",
       ]
+    } else if (is_ohos) {
+      sources += [
+        "$_skia_root/src/gpu/ganesh/gl/egl/GrGLMakeEGLInterface.cpp",
+        "$_skia_root/src/gpu/ganesh/gl/egl/GrGLMakeNativeInterface_egl.cpp",
+      ]
+      public_defines += [ "SK_EGL" ]
     } else if (is_linux && skia_use_x11) {
       sources += [
         "$_skia_root/src/gpu/ganesh/gl/glx/GrGLMakeGLXInterface.cpp",
@@ -606,6 +627,7 @@ skia_component("skia") {
     ":fontmgr_fontconfig",
     ":fontmgr_fuchsia",
     ":fontmgr_mac_ct",
+    ":fontmgr_ohos",
     ":fontmgr_win",
     ":gpu",
     ":jpeg_encode",
@@ -742,5 +764,14 @@ skia_component("skia") {
 
   if (is_fuchsia) {
     sources += [ "$_skia_root/src/ports/SkDebug_stdio.cpp" ]
+  }
+
+  if (is_ohos) {
+    sources += [ "$_skia_root/src/ports/SkDebug_ohos.cpp" ]
+    libs += [
+      "EGL",
+      "GLESv3",
+      "hilog_ndk.z",
+    ]
   }
 }

@@ -14,6 +14,10 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #endif  // FML_OS_ANDROID
+#ifdef FML_OS_OHOS
+#include <qos/qos.h>
+#include <sys/resource.h>
+#endif  // FML_OS_OHOS
 
 #include <map>
 #include <memory>
@@ -153,6 +157,12 @@ void ContextVK::Setup(Settings settings) {
       FML_LOG(ERROR) << "Failed to set Workers task runner priority";
     }
 #endif  // FML_OS_ANDROID
+#ifdef FML_OS_OHOS
+    OH_QoS_SetThreadQoS(QoS_Level::QOS_BACKGROUND);
+    if (::setpriority(PRIO_PROCESS, 0, 10) != 0) {
+      FML_LOG(ERROR) << "Failed to set Workers task runner priority";
+    }
+#endif  // FML_OS_OHOS
   });
 
   auto& dispatcher = VULKAN_HPP_DEFAULT_DISPATCHER;
