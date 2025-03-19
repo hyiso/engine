@@ -22,6 +22,17 @@
 #include <GLES2/gl2ext.h>
 
 namespace flutter {
+// This global map's key is (texture_id)
+std::map<int64_t, PlatformViewOHOS*> g_texture_platform_view_map;
+
+static void OnNativeImageFrameAvailable(void* data) {
+  int64_t texture_id = (int64_t)data;
+  auto platform_view = g_texture_platform_view_map[texture_id];
+  if (platform_view) {
+    platform_view->MarkTextureFrameAvailable(texture_id);
+    platform_view->ScheduleFrame();
+  }
+}
 
 OHOSSurfaceFactoryImpl::OHOSSurfaceFactoryImpl(
     const std::shared_ptr<OHOSContext>& context,
@@ -406,7 +417,16 @@ void PlatformViewOHOS::RegisterExternalTexture(int64_t texture_id,
                         "android-surface-plugins";
   }
   RegisterTexture(external_texture);
+  OH_OnFrameAvailableListener listener;
+  listener.context = reinterpret_cast<void*>(texture_id);
+  listener.onFrameAvailable = &OnNativeImageFrameAvailable;
+  int32_t ret =
+      OH_NativeImage_SetOnFrameAvailableListener(native_image, listener);
+  if (ret != 0) {
+    FML_LOG(ERROR) << "OH_NativeImage_SetOnFrameAvailableListener err:" << ret;
+  }
   external_texture_gl_[texture_id] = external_texture;
+  g_texture_platform_view_map[texture_id] = this;
 }
 
 void PlatformViewOHOS::SetTextureBufferSize(int64_t texture_id,
@@ -420,6 +440,7 @@ void PlatformViewOHOS::SetTextureBufferSize(int64_t texture_id,
 
 void PlatformViewOHOS::UnRegisterExternalTexture(int64_t texture_id) {
   external_texture_gl_.erase(texture_id);
+  g_texture_platform_view_map.erase(texture_id);
   UnregisterTexture(texture_id);
 }
 

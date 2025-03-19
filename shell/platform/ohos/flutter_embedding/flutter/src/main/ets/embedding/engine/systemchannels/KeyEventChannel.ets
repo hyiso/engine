@@ -21,21 +21,22 @@ import JSONMessageCodec from '../../../plugin/common/JSONMessageCodec';
 export default class KeyEventChannel {
   private static TAG = "KeyEventChannel";
   private static CHANNEL_NAME = "flutter/keyevent";
-  private channel: BasicMessageChannel<Map<String, Object>>;
+  private channel: BasicMessageChannel<Object>;
 
   constructor(binaryMessenger: BinaryMessenger) {
-    this.channel = new BasicMessageChannel<Map<String, Object>>(binaryMessenger, KeyEventChannel.CHANNEL_NAME, JSONMessageCodec.INSTANCE);
+    this.channel = new BasicMessageChannel<Object>(binaryMessenger, KeyEventChannel.CHANNEL_NAME, JSONMessageCodec.INSTANCE);
   }
 
   sendFlutterKeyEvent(keyEvent: FlutterKeyEvent,
                       isKeyUp: boolean,
                       responseHandler: EventResponseHandler): void {
     this.channel.send(this.encodeKeyEvent(keyEvent, isKeyUp),
-      (message: Map<String, Object>) => {
+      (message: Object) => {
         let isEventHandled = false;
         try {
           if (message != null) {
-            isEventHandled = message.get("handled") as boolean;
+            const annotatedEvent = message as Record<string, Object>;
+            isEventHandled = annotatedEvent["handled"] as boolean;
           }
         } catch (e) {
           Log.e(KeyEventChannel.TAG, "Unable to unpack JSON message: " + e);

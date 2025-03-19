@@ -19,11 +19,6 @@
 
 namespace flutter {
 
-static void OnNativeImageFrameAvailable(void* data) {
-  auto texture = reinterpret_cast<SurfaceTextureExternalTexture*>(data);
-  texture->MarkNewFrameAvailable();
-}
-
 SurfaceTextureExternalTexture::SurfaceTextureExternalTexture(
     int64_t id,
     OH_NativeImage* native_image,
@@ -31,16 +26,7 @@ SurfaceTextureExternalTexture::SurfaceTextureExternalTexture(
     : Texture(id),
       napi_facade_(napi_facade),
       native_image_(native_image),
-      transform_(SkMatrix::I()) {
-  OH_OnFrameAvailableListener listener;
-  listener.context = this;
-  listener.onFrameAvailable = &OnNativeImageFrameAvailable;
-  int32_t ret =
-      OH_NativeImage_SetOnFrameAvailableListener(native_image, listener);
-  if (ret != 0) {
-    FML_LOG(ERROR) << "OH_NativeImage_SetOnFrameAvailableListener err:" << ret;
-  }
-}
+      transform_(SkMatrix::I()) {}
 
 SurfaceTextureExternalTexture::~SurfaceTextureExternalTexture() {}
 
