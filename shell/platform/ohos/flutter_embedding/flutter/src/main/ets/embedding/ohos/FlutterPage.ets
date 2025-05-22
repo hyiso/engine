@@ -42,7 +42,7 @@ export struct FlutterPage {
 
   aboutToAppear() {
     this.flutterView = FlutterManager.getInstance().getFlutterView(this.viewId);
-    this.flutterView?.addFirstFrameListener(this)
+    this.flutterView?.addOnFirstFrameRenderedListener(this);
 
     this.flutterView?.setCheckFullScreen(this.checkFullScreen)
     this.flutterView?.setCheckKeyboard(this.checkKeyboard)
@@ -52,11 +52,15 @@ export struct FlutterPage {
   }
 
   aboutToDisappear() {
-    this.flutterView?.removeFirstFrameListener(this);
+    this.flutterView?.removeOnFirstFrameRenderedListener(this);
   }
 
-  onFirstFrame() {
+  onFlutterUiDisplayed() {
     this.showSplashScreen = false;
+  }
+
+  onFlutterUiNoLongerDisplayed() {
+    this.showSplashScreen = true;
   }
 
   build() {

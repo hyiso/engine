@@ -18,14 +18,52 @@ import { SurfaceTextureEntry, TextureRegistry } from '../../../view/TextureRegis
 import FlutterNAPI from '../FlutterNAPI';
 import { SurfaceTextureWrapper } from './SurfaceTextureWrapper.ets';
 import Log from '../../../util/Log';
+import { FlutterUiDisplayListener } from './FlutterUiDisplayListener';
 
 const TAG = "FlutterRenderer"
 export class FlutterRenderer implements TextureRegistry {
   private nextTextureId: number = 0;
   private flutterNAPI: FlutterNAPI;
+  private _isDisplayingFlutterUi: boolean = false;
+  private flutterUiDisplayListener: FlutterUiDisplayListener = Object({
+    onFlutterUiDisplayed: () => {
+      this._isDisplayingFlutterUi = true;
+    },
+    onFlutterUiNoLongerDisplayed: () => {
+      this._isDisplayingFlutterUi = false;
+    }
+  });
 
   constructor(flutterNAPI: FlutterNAPI) {
     this.flutterNAPI = flutterNAPI;
+    this.flutterNAPI.addIsDisplayingFlutterUiListener(this.flutterUiDisplayListener);
+  }
+
+  /**
+   * Returns true if this {@code FlutterRenderer} is painting pixels to an HarmonyOS ArkUI
+   * hierarchy, false otherwise.
+   */
+  isDisplayingFlutterUi(): boolean {
+    return this._isDisplayingFlutterUi;
+  }
+
+  /**
+   * Adds a listener that is invoked whenever this {@code FlutterRenderer} starts and stops painting
+   * pixels to an HarmonyOS ArkUI hierarchy.
+   */
+  addIsDisplayingFlutterUiListener(listener: FlutterUiDisplayListener): void {
+    this.flutterNAPI.addIsDisplayingFlutterUiListener(listener);
+    if (this._isDisplayingFlutterUi) {
+      listener.onFlutterUiDisplayed();
+    }
+  }
+
+  /**
+   * Removes a listener added via {@link
+  * #addIsDisplayingFlutterUiListener(FlutterUiDisplayListener)}.
+  */
+  removeIsDisplayingFlutterUiListener(listener: FlutterUiDisplayListener): void {
+    this.flutterNAPI.removeIsDisplayingFlutterUiListener(listener);
   }
 
   createSurfaceTexture(): SurfaceTextureEntry {

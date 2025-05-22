@@ -25,7 +25,7 @@ import { Action } from '../../view/AccessibilityBridge'
 import LocalizationPlugin from '../../plugin/localization/LocalizationPlugin';
 import intl from '@ohos.intl';
 import FlutterManager from '../ohos/FlutterManager';
-
+import { FlutterUiDisplayListener } from './renderer/FlutterUiDisplayListener';
 const TAG = "FlutterNAPI";
 
 export default class FlutterNAPI {
@@ -36,7 +36,7 @@ export default class FlutterNAPI {
   accessibilityDelegate: AccessibilityDelegate | null = null;
   localizationPlugin: LocalizationPlugin | null = null;
 
-  isDisplayingFlutterUi: boolean = false;
+  private flutterUiDisplayListeners: Set<FlutterUiDisplayListener> = new Set();
 
   updateRefreshRate(refreshRateFPS : number) {
     flutter.nativeUpdateRefreshRate(refreshRateFPS);
@@ -114,6 +114,24 @@ export default class FlutterNAPI {
 
   private ensureRunningOnMainThread(): void {
 
+  }
+
+  // ----- Start Render Surface Support -----
+  /**
+   * Adds a {@link FlutterUiDisplayListener}, which receives a callback when Flutter's engine
+   * notifies {@code FlutterNAPI} that Flutter is painting pixels to the {@link Surface} that was
+   * provided to Flutter.
+   */
+  addIsDisplayingFlutterUiListener(listener: FlutterUiDisplayListener): void {
+    this.flutterUiDisplayListeners.add(listener);
+  }
+
+  /**
+   * Removes a {@link FlutterUiDisplayListener} that was added with {@link
+   * #addIsDisplayingFlutterUiListener(FlutterUiDisplayListener)}.
+   */
+  removeIsDisplayingFlutterUiListener(listener: FlutterUiDisplayListener): void {
+    this.flutterUiDisplayListeners.delete(listener);
   }
 
   dispatchEmptyPlatformMessage(channel: String, responseId: number): void {
@@ -255,11 +273,7 @@ export default class FlutterNAPI {
 
   // Called by native to notify first Flutter frame rendered.
   onFirstFrame(): void {
-    this.isDisplayingFlutterUi = true;
-    Log.d(TAG, "called onFirstFrame")
-    FlutterManager.getInstance().getFlutterViewList().forEach((value)=> {
-      value.onFirstFrame();
-    });
+    this.flutterUiDisplayListeners.forEach(listener => listener.onFlutterUiDisplayed());
   }
 
   // Called by native.

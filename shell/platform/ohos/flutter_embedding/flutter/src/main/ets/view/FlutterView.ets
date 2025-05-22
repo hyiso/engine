@@ -14,7 +14,6 @@
 */
 import display from '@ohos.display';
 import window from '@ohos.window';
-import ArrayList from '@ohos.util.ArrayList';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 import { Configuration } from '@ohos.app.ability.Configuration';
 import { JSON } from '@kit.ArkTS';
@@ -32,6 +31,8 @@ import FlutterEngine from '../embedding/engine/FlutterEngine';
 import { EmbeddingNodeController } from '../embedding/ohos/EmbeddingNodeController';
 import PlatformView, { Params } from '../plugin/platform/PlatformView';
 import OhosTouchProcessor from '../embedding/ohos/OhosTouchProcessor.ets';
+import { FlutterRenderer } from '../embedding/engine/renderer/FlutterRenderer.ets';
+import { FlutterUiDisplayListener } from '../embedding/engine/renderer/FlutterUiDisplayListener';
 
 const TAG = "FlutterView";
 
@@ -129,7 +130,21 @@ export class FlutterView extends XComponentController {
   private ohosTouchProcessor: OhosTouchProcessor | null = null;
   private mainWindow: window.Window | null = null;
   private mouseCursorPlugin?: MouseCursorPlugin;
-  private mFirstFrameListeners: ArrayList<FirstFrameListener>;
+  private flutterUiDisplayListeners: Set<FlutterUiDisplayListener> = new Set();
+  private flutterUiDisplayListener: FlutterUiDisplayListener = Object({
+    onFlutterUiDisplayed: () => {
+      this.isFlutterUiDisplayed = true;
+      this.flutterUiDisplayListeners.forEach((listener) => {
+        listener.onFlutterUiDisplayed();
+      });
+    },
+    onFlutterUiNoLongerDisplayed: () => {
+      this.isFlutterUiDisplayed = false;
+      this.flutterUiDisplayListeners.forEach((listener) => {
+        listener.onFlutterUiNoLongerDisplayed();
+      });
+    }
+  });
   private isFlutterUiDisplayed: boolean = false;
   private surfaceId: string = "0";
   private nodeController: EmbeddingNodeController = new EmbeddingNodeController();
@@ -156,7 +171,6 @@ export class FlutterView extends XComponentController {
     const mainWindow = FlutterManager.getInstance()
       .getWindowStage(FlutterManager.getInstance().getUIAbility(context))
       .getMainWindowSync();
-    this.mFirstFrameListeners = new ArrayList<FirstFrameListener>();
 
     mainWindow.on('windowSizeChange', this.windowSizeChangeCallback);
     mainWindow.on('avoidAreaChange', this.avoidAreaChangeCallback);
@@ -274,9 +288,15 @@ export class FlutterView extends XComponentController {
       this.detachFromFlutterEngine();
     }
     this.flutterEngine = flutterEngine;
+
+    // Instruct our FlutterRenderer that we are now its designated RenderSurface.
+    const flutterRenderer: FlutterRenderer = this.flutterEngine.getRenderer();
+    this.isFlutterUiDisplayed = flutterRenderer.isDisplayingFlutterUi();
+    flutterRenderer.addIsDisplayingFlutterUiListener(this.flutterUiDisplayListener);
+
     this.keyboardManager = new KeyboardManager(flutterEngine);
     this.ohosTouchProcessor = new OhosTouchProcessor(flutterEngine.getRenderer(), false);
-    this.flutterEngine?.getFlutterNAPI()?.updateRefreshRate(this.displayInfo!.refreshRate)
+    this.flutterEngine?.getFlutterNAPI()?.updateRefreshRate(this.displayInfo!.refreshRate);
     flutterEngine.getPlatformViewsController()?.attachToView(this);
     this.updateViewportMetrics()
 
@@ -314,9 +334,8 @@ export class FlutterView extends XComponentController {
         Log.d(TAG, "onMemoryLevel: " + JSON.stringify(level));
       }
     });
-    this.isFlutterUiDisplayed = this.flutterEngine.getFlutterNAPI().isDisplayingFlutterUi;
     if (this.isFlutterUiDisplayed) {
-      this.onFirstFrame();
+      this.flutterUiDisplayListener.onFlutterUiDisplayed();
     }
   }
 
@@ -328,6 +347,9 @@ export class FlutterView extends XComponentController {
     }
     this.flutterEngine?.getPlatformViewsController()?.detachFromView();
     this.context.getApplicationContext().off('environment', this.environmentCallbackId);
+
+    const flutterRenderer: FlutterRenderer|undefined = this.flutterEngine?.getRenderer();
+    flutterRenderer?.removeIsDisplayingFlutterUiListener(this.flutterUiDisplayListener);
     this.flutterEngine = null;
     this.keyboardManager = null;
   }
@@ -433,7 +455,8 @@ export class FlutterView extends XComponentController {
 
   private updateViewportMetrics() {
     if (this.isAttachedToFlutterEngine()) {
-      this?.flutterEngine?.getFlutterNAPI()?.setViewportMetrics(this.viewportMetrics.devicePixelRatio,
+      this?.flutterEngine?.getFlutterNAPI()?.setViewportMetrics(
+        this.viewportMetrics.devicePixelRatio,
         this.viewportMetrics.physicalWidth,
         this.viewportMetrics.physicalHeight,
         this.viewportMetrics.physicalViewPaddingTop,
@@ -463,23 +486,24 @@ export class FlutterView extends XComponentController {
     this.ohosTouchProcessor?.onTouchEvent(event)
   }
 
-  addFirstFrameListener(listener: FirstFrameListener) {
-    this.mFirstFrameListeners.add(listener);
-  }
-
-  removeFirstFrameListener(listener: FirstFrameListener) {
-    this.mFirstFrameListeners.remove(listener);
-  }
-
   hasRenderedFirstFrame(): boolean {
     return this.isFlutterUiDisplayed;
   }
 
-  onFirstFrame() {
-    let listeners = this.mFirstFrameListeners.clone();
-    listeners.forEach((listener) => {
-      listener.onFirstFrame();
-    })
+  /**
+   * Adds the given {@code listener} to this {@code FlutterView}, to be notified upon Flutter's
+   * first rendered frame.
+   */
+  addOnFirstFrameRenderedListener(listener: FlutterUiDisplayListener) {
+    this.flutterUiDisplayListeners.add(listener);
+  }
+
+  /**
+   * Adds the given {@code listener} to this {@code FlutterView}, to be notified upon Flutter's
+   * first rendered frame.
+   */
+  removeOnFirstFrameRenderedListener(listener: FlutterUiDisplayListener) {
+    this.flutterUiDisplayListeners.delete(listener);
   }
 
   setCheckFullScreen(check: boolean) {
@@ -494,8 +518,4 @@ export class FlutterView extends XComponentController {
     this.checkGesture = check
   }
 
-}
-
-export interface FirstFrameListener {
-  onFirstFrame(): void;
 }
